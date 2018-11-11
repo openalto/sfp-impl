@@ -50,7 +50,7 @@ class QueryEntry(object):
                     logging.info("Found in " + peer)
                     src_port = obj.get("src-port") or "*"
                     dst_port = obj.get("dst-port") or "*"
-                    full_path = [Rib().domain_name] + ret_obj["path"]
+                    full_path = [Rib.DOMAIN_NAME] + ret_obj["path"]
                     ribItems.append(RibItem(src_ip=obj["src-ip"], dst_ip=obj["dst-ip"], src_port=src_port,
                                             dst_port=dst_port, protocol=obj["protocol"], inner=False,
                                             peer_speaker=peer, path=full_path))
