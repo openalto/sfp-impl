@@ -49,10 +49,13 @@ class QueryEntry(object):
                 logging.debug("Send request to " + url)
                 r = requests.post(url, json={"input": obj})
                 obj = json.loads(r.text)
+                logging.debug("Get response from " + peer + ": " + str(obj))
                 if obj["result"]:
                     logging.info("Found in " + peer)
-                    ribItems.append(RibItem(src_ip=obj["src-ip"], dst_ip=obj["dst-ip"], src_port=obj["src-port"],
-                                            dst_port=obj["dst-port"], protocol=obj["protocol"], inner=False,
+                    src_port = obj["src-port"] or "*"
+                    dst_port = obj["dst-port"] or "*"
+                    ribItems.append(RibItem(src_ip=obj["src-ip"], dst_ip=obj["dst-ip"], src_port=src_port,
+                                            dst_port=dst_port, protocol=obj["protocol"], inner=False,
                                             peer_speaker=peer))
                     resp.status = falcon.HTTP_200
                     resp.body = json.dumps({"result": True, "path": [Rib().domain_name] + obj["path"]})
