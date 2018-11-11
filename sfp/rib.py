@@ -39,13 +39,17 @@ class Singleton(type):
 
 
 class Rib(object, metaclass=Singleton):
-    def __init__(self):
-        self.rib = []
-        self.peer_list = []
-        self.domain_name = ""
+    INSTANCE = False
 
-        # Read initial rib from file
-        self.read_from_file(SFPDefinition.INITIAL_RIB_FILE)
+    def __init__(self):
+        if not Rib.INSTANCE:
+            Rib.INSTANCE = True
+            self.rib = []
+            self.peer_list = []
+            self.domain_name = ""
+
+            # Read initial rib from file
+            self.read_from_file(SFPDefinition.INITIAL_RIB_FILE)
 
     def read_from_file(self, file_path):
         contents = open(file_path, 'r').read()
