@@ -22,7 +22,7 @@ class QueryEntry(object):
     """
 
     def on_post(self, req, resp):
-        obj = json.loads(req.stream.read())
+        obj = json.loads(req.stream.read())["input"]
         if "src-port" not in obj:
             obj["src-port"] = None
         if "dst-port" not in obj:
@@ -43,7 +43,7 @@ class QueryEntry(object):
         for peer in peer_list:
             ip = peer.split(":")[0]  # WARN: loop maybe
             if ip != remote_ip:
-                r = requests.post("http://" + peer + "/query", json=obj)
+                r = requests.post("http://" + peer + "/query", json={"input": obj})
                 obj = json.loads(r.text)
                 if obj["result"]:
                     ribItems.append(RibItem(src_ip=obj["src-ip"], dst_ip=obj["dst-ip"], src_port=obj["src-port"],
