@@ -39,7 +39,7 @@ class Singleton(type):
         return cls._instances[cls]
 
 
-class Rib(object, metaclass=Singleton):
+class Rib(object):
     DOMAIN_NAME = ""
     rib = []
     peer_list = []
