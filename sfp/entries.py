@@ -1,6 +1,7 @@
 import json
 import requests
 import falcon
+import logging
 
 from sfp.rib import Rib, RibItem
 
@@ -30,6 +31,7 @@ class QueryEntry(object):
         result = False
         for ribItem in ribItems:
             if ribItem.match(obj["src-ip"], obj["dst-ip"], obj["src-port"], obj["dst-port"], obj["protocol"]):
+                logging.info("Match local rib successfully")
                 result = True
                 break
         if result:
@@ -39,17 +41,22 @@ class QueryEntry(object):
         remote_ip = req.remote_addr
         peer_list = Rib().peer_list
         for peer in peer_list:
+            logging.debug("Finding " + obj["dst-ip"] + " in peer: " + peer)
             ip = peer.split(":")[0]  # WARN: loop maybe
             if ip != remote_ip:
-                r = requests.post("http://" + peer + "/query", json={"input": obj})
+                url = "http://" + peer + "/query"
+                logging.debug("Send request to " + url)
+                r = requests.post(url, json={"input": obj})
                 obj = json.loads(r.text)
                 if obj["result"]:
+                    logging.info("Found in " + peer)
                     ribItems.append(RibItem(src_ip=obj["src-ip"], dst_ip=obj["dst-ip"], src_port=obj["src-port"],
                                             dst_port=obj["dst-port"], protocol=obj["protocol"], inner=False,
                                             peer_speaker=peer))
                     resp.status = falcon.HTTP_200
                     resp.body = json.dumps({"result": True, "path": [Rib().domain_name] + obj["path"]})
                     return
+                logging.info("Not found in " + peer)
         resp.status = falcon.HTTP_200
         resp.body = json.dumps({"result": False})
 
