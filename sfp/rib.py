@@ -4,12 +4,13 @@ import json
 
 class RibItem:
     def __init__(self, src_ip="*", dst_ip="*", src_port="*", dst_port="*", protocol="*", egress_port=None,
-                 peer_speaker=None, inner=False):
+                 peer_speaker=None, inner=False, path=None):
         self.src_ip = src_ip
         self.dst_ip = dst_ip
         self.src_port = src_port
         self.dst_port = dst_port
         self.protocol = protocol
+        self.path = path or [Rib().domain_name]
 
         self.egress_port = egress_port
         self.peer_speaker = peer_speaker

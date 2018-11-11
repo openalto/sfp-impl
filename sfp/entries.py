@@ -29,16 +29,12 @@ class QueryEntry(object):
             obj["dst-port"] = None
 
         ribItems = Rib().rib
-        result = False
         for ribItem in ribItems:
             if ribItem.match(obj["src-ip"], obj["dst-ip"], obj["src-port"], obj["dst-port"], obj["protocol"]):
                 logging.info("Match local rib successfully")
-                result = True
-                break
-        if result:
-            resp.status = falcon.HTTP_200
-            resp.body = json.dumps({"result": result, "path": [Rib().domain_name]})
-            return
+                resp.body = json.dumps({"result": True, "path": ribItem.path})
+                resp.status = falcon.HTTP_200
+                return
         remote_ip = req.remote_addr
         peer_list = Rib().peer_list
         for peer in peer_list:
@@ -54,11 +50,12 @@ class QueryEntry(object):
                     logging.info("Found in " + peer)
                     src_port = obj.get("src-port") or "*"
                     dst_port = obj.get("dst-port") or "*"
+                    full_path = [Rib().domain_name] + ret_obj["path"]
                     ribItems.append(RibItem(src_ip=obj["src-ip"], dst_ip=obj["dst-ip"], src_port=src_port,
                                             dst_port=dst_port, protocol=obj["protocol"], inner=False,
-                                            peer_speaker=peer))
+                                            peer_speaker=peer, path=full_path))
                     resp.status = falcon.HTTP_200
-                    resp.body = json.dumps({"result": True, "path": [Rib().domain_name] + ret_obj["path"]})
+                    resp.body = json.dumps({"result": True, "path": full_path})
                     return
                 logging.info("Not found in " + peer)
         resp.status = falcon.HTTP_200
