@@ -11,11 +11,11 @@ class QueryEntry(object):
     {
         "input": [
             {
-                "src_ip": <src_ip>,
-                "dst_ip": <dst_ip>,
+                "src-ip": <src-ip>,
+                "dst-ip": <dst-ip>,
                 "protocol": <protocol>,
-                "src_port": <src_port>, #Optional
-                "dst_port": <dst_port> #Optional
+                "src-port": <src-port>, #Optional
+                "dst-port": <dst-port> #Optional
             }
         ]
     }
@@ -23,15 +23,15 @@ class QueryEntry(object):
 
     def on_post(self, req, resp):
         obj = json.loads(req.stream.read())
-        if "src_port" not in obj:
-            obj["src_port"] = None
-        if "dst_port" not in obj:
-            obj["dst_port"] = None
+        if "src-port" not in obj:
+            obj["src-port"] = None
+        if "dst-port" not in obj:
+            obj["dst-port"] = None
 
         ribItems = Rib().rib
         result = False
         for ribItem in ribItems:
-            if ribItem.match(obj["src_ip"], obj["dst_ip"], obj["src_port"], obj["dst_port"], obj["protocol"]):
+            if ribItem.match(obj["src-ip"], obj["dst-ip"], obj["src-port"], obj["dst-port"], obj["protocol"]):
                 result = True
                 break
         if result:
@@ -46,8 +46,8 @@ class QueryEntry(object):
                 r = requests.post("http://" + peer + "/query", json=obj)
                 obj = json.loads(r.text)
                 if obj["result"]:
-                    ribItems.append(RibItem(src_ip=obj["src_ip"], dst_ip=obj["dst_ip"], src_port=obj["src_port"],
-                                            dst_port=obj["dst_port"], protocol=obj["protocol"], inner=False,
+                    ribItems.append(RibItem(src_ip=obj["src-ip"], dst_ip=obj["dst-ip"], src_port=obj["src-port"],
+                                            dst_port=obj["dst-port"], protocol=obj["protocol"], inner=False,
                                             peer_speaker=peer))
                     resp.status = falcon.HTTP_200
                     resp.body = json.dumps({"result": True, "path": [Rib().domain_name] + obj["path"]})
