@@ -22,13 +22,14 @@ class QueryEntry(object):
             }
         }
         """
+        Rib.initialize()
         obj = json.loads(req.stream.read())["input"]
         if "src-port" not in obj:
             obj["src-port"] = None
         if "dst-port" not in obj:
             obj["dst-port"] = None
 
-        ribItems = Rib().rib
+        ribItems = Rib.rib
         for ribItem in ribItems:
             if ribItem.match(obj["src-ip"], obj["dst-ip"], obj["src-port"], obj["dst-port"], obj["protocol"]):
                 logging.info("Match local rib successfully")
@@ -36,7 +37,7 @@ class QueryEntry(object):
                 resp.status = falcon.HTTP_200
                 return
         remote_ip = req.remote_addr
-        peer_list = Rib().peer_list
+        peer_list = Rib.peer_list
         for peer in peer_list:
             logging.debug("Finding " + obj["dst-ip"] + " in peer: " + peer)
             ip = peer.split(":")[0]  # WARN: loop maybe
@@ -73,6 +74,6 @@ class PeerRegisterEntry(object):
     def on_post(self, req, resp):
         obj = json.loads(req.stream.read)
         addr = obj["address"]
-        Rib().peer_list.append(addr)
+        Rib.peer_list.append(addr)
         resp.status = falcon.HTTP_200
         resp.body = json.dumps({"result": True})

@@ -40,26 +40,27 @@ class Singleton(type):
 
 
 class Rib(object, metaclass=Singleton):
-    INSTANCE = False
     DOMAIN_NAME = ""
+    rib = []
+    peer_list = []
+    initialized = False
 
-    def __init__(self):
-        if not Rib.INSTANCE:
-            Rib.INSTANCE = True
-            self.rib = []
-            self.peer_list = []
+    @staticmethod
+    def initialize():
+        if not Rib.initialized:
+            Rib.initialized = True
+            Rib.read_from_file()
 
-            # Read initial rib from file
-            self.read_from_file(SFPDefinition.INITIAL_RIB_FILE)
 
-    def read_from_file(self, file_path):
+    @staticmethod
+    def read_from_file(file_path=SFPDefinition.INITIAL_RIB_FILE):
         contents = open(file_path, 'r').read()
         obj = json.loads(contents)
         Rib.DOMAIN_NAME = obj["domain-name"]
         for cidr in obj["inner-cidr"]:
             rib_item = RibItem(dst_ip=cidr, inner=True)
-            self.rib.append(rib_item)
+            Rib.rib.append(rib_item)
 
         for peer in obj["peers"]:
-            self.peer_list.append(peer)
+            Rib.peer_list.append(peer)
 
