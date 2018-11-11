@@ -16,9 +16,9 @@ class RibItem:
         self.inner = inner
 
     def match(self, src_ip, dst_ip, src_port, dst_port, protocol):
-        if self.src_ip != '*' and self.src_ip.startswith(src_ip): # TODO: change this
+        if self.src_ip != '*' and not self.src_ip.startswith(src_ip): # TODO: change this
             return False
-        if self.dst_ip != '*' and self.dst_ip.startswith(dst_ip): # TODO: change this
+        if self.dst_ip != '*' and not self.dst_ip.startswith(dst_ip): # TODO: change this
             return False
         if self.src_port != '*' and self.src_port != src_port:
             return False
