@@ -9,15 +9,13 @@ class QueryEntry(object):
     """
     input format
     {
-        "input": [
-            {
-                "src-ip": <src-ip>,
-                "dst-ip": <dst-ip>,
-                "protocol": <protocol>,
-                "src-port": <src-port>, #Optional
-                "dst-port": <dst-port> #Optional
-            }
-        ]
+        "input": {
+            "src-ip": <src-ip>,
+            "dst-ip": <dst-ip>,
+            "protocol": <protocol>,
+            "src-port": <src-port>, #Optional
+            "dst-port": <dst-port> #Optional
+        }
     }
     """
 
