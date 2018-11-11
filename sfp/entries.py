@@ -7,6 +7,7 @@ from sfp.rib import Rib, RibItem
 
 logging.basicConfig(filename='sfp.log', level=logging.DEBUG)
 
+
 class QueryEntry(object):
 
     def on_post(self, req, resp):
@@ -52,7 +53,7 @@ class QueryEntry(object):
                     src_port = obj.get("src-port") or "*"
                     dst_port = obj.get("dst-port") or "*"
                     full_path = [Rib.DOMAIN_NAME] + ret_obj["path"]
-                    ribItems.append(RibItem(src_ip=obj["src-ip"], dst_ip=obj["dst-ip"], src_port=src_port,
+                    Rib.rib.append(RibItem(src_ip=obj["src-ip"], dst_ip=obj["dst-ip"], src_port=src_port,
                                             dst_port=dst_port, protocol=obj["protocol"], inner=False,
                                             peer_speaker=peer, path=full_path))
                     resp.status = falcon.HTTP_200
@@ -77,3 +78,7 @@ class PeerRegisterEntry(object):
         Rib.peer_list.append(addr)
         resp.status = falcon.HTTP_200
         resp.body = json.dumps({"result": True})
+
+
+class PathQueryEntry():
+    pass
