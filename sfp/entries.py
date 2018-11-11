@@ -48,9 +48,9 @@ class QueryEntry(object):
                 url = "http://" + peer + "/query"
                 logging.debug("Send request to " + url)
                 r = requests.post(url, json={"input": obj})
-                obj = json.loads(r.text)
+                ret_obj = json.loads(r.text)
                 logging.debug("Get response from " + peer + ": " + str(obj))
-                if obj["result"]:
+                if ret_obj["result"]:
                     logging.info("Found in " + peer)
                     src_port = obj.get("src-port") or "*"
                     dst_port = obj.get("dst-port") or "*"
@@ -58,7 +58,7 @@ class QueryEntry(object):
                                             dst_port=dst_port, protocol=obj["protocol"], inner=False,
                                             peer_speaker=peer))
                     resp.status = falcon.HTTP_200
-                    resp.body = json.dumps({"result": True, "path": [Rib().domain_name] + obj["path"]})
+                    resp.body = json.dumps({"result": True, "path": [Rib().domain_name] + ret_obj["path"]})
                     return
                 logging.info("Not found in " + peer)
         resp.status = falcon.HTTP_200
