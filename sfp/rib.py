@@ -42,6 +42,7 @@ class Rib(object, metaclass=Singleton):
     def __init__(self):
         self.rib = []
         self.peer_list = []
+        self.domain_name = ""
 
         # Read initial rib from file
         self.read_from_file(SFPDefinition.INITIAL_RIB_FILE)
@@ -55,3 +56,5 @@ class Rib(object, metaclass=Singleton):
 
         for peer in obj["peers"]:
             self.peer_list.append(peer)
+
+        self.domain_name = obj["domain-name"]

@@ -36,7 +36,7 @@ class QueryEntry(object):
                 break
         if result:
             resp.status = falcon.HTTP_200
-            resp.body = json.dumps({"result": result})
+            resp.body = json.dumps({"result": result, "path": [Rib().domain_name]})
             return
         remote_ip = req.remote_addr
         peer_list = Rib().peer_list
@@ -44,12 +44,13 @@ class QueryEntry(object):
             ip = peer.split(":")[0]  # WARN: loop maybe
             if ip != remote_ip:
                 r = requests.post("http://" + peer + "/query", json=obj)
-                if json.loads(r.text)["result"]:
+                obj = json.loads(r.text)
+                if obj["result"]:
                     ribItems.append(RibItem(src_ip=obj["src_ip"], dst_ip=obj["dst_ip"], src_port=obj["src_port"],
                                             dst_port=obj["dst_port"], protocol=obj["protocol"], inner=False,
                                             peer_speaker=peer))
                     resp.status = falcon.HTTP_200
-                    resp.body = json.dumps({"result": True})
+                    resp.body = json.dumps({"result": True, "path": [Rib().domain_name] + obj["path"]})
                     return
         resp.status = falcon.HTTP_200
         resp.body = json.dumps({"result": False})
