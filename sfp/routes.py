@@ -1,4 +1,4 @@
-from sfp.entries import QueryEntry, PeerRegisterEntry
+from sfp.entries import QueryEntry, PeerRegisterEntry, PathQueryEntry
 
 
 def define_routes(app):
