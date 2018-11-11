@@ -5,22 +5,23 @@ import logging
 
 from sfp.rib import Rib, RibItem
 
+logging.basicConfig(filename='sfp.log', level=logging.DEBUG)
 
 class QueryEntry(object):
-    """
-    input format
-    {
-        "input": {
-            "src-ip": <src-ip>,
-            "dst-ip": <dst-ip>,
-            "protocol": <protocol>,
-            "src-port": <src-port>, #Optional
-            "dst-port": <dst-port> #Optional
-        }
-    }
-    """
 
     def on_post(self, req, resp):
+        """
+        input format
+        {
+            "input": {
+                "src-ip": <src-ip>,
+                "dst-ip": <dst-ip>,
+                "protocol": <protocol>,
+                "src-port": <src-port>, #Optional
+                "dst-port": <dst-port> #Optional
+            }
+        }
+        """
         obj = json.loads(req.stream.read())["input"]
         if "src-port" not in obj:
             obj["src-port"] = None
