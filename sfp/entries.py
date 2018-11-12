@@ -135,10 +135,14 @@ class PathQueryEntry():
         for flow in flows:
             f = {"input": {"src-ip": flow["src"], "dst-ip": flow["dst"], "protocol": "tcp"}}
             r = requests.post("http://127.0.0.1:8399/query", json=f)
-            flow_paths_name.append(json.load(r.text)["path"])
+            flow_paths_name.append(json.loads(r.text)["path"])
 
         path_propety = []
-        all_names = list(set.union(*flow_paths_name))
+        all_names = set()
+        for name_path in flow_paths_name:
+            for hop in name_path:
+                all_names.add(hop)
+        all_names = list(all_names)
         for name in all_names:
             path_propety.append({
                 "domain-id": name,
@@ -146,6 +150,9 @@ class PathQueryEntry():
                 "egress-port": data.domain_data.get('egress-port')
             })
 
-        flow_paths = [all_names.index(i) for i in flow_paths_name]
+        flow_paths = []
+        for name_path in flow_paths_name:
+            flow_path = [all_names.index(i) for i in name_path]
+            flow_paths.append(flow_path)
         resp.status = falcon.HTTP_200
         resp.body = json.dumps({ "flow-paths": flow_paths, "path-property": path_propety })
