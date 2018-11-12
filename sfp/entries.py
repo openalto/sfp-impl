@@ -142,12 +142,12 @@ class PathQueryEntry():
         for name_path in flow_paths_name:
             for hop in name_path:
                 all_names.add(hop)
-        all_names = list(all_names)
+        all_names = sorted(list(all_names))
         for name in all_names:
             path_propety.append({
                 "domain-id": name,
-                "ingress-port": data.domain_data.get('ingress-port'),
-                "egress-port": data.domain_data.get('egress-port')
+                "ingress-port": data.domain_data.get(name).get('ingress-port'),
+                "egress-port": data.domain_data.get(name).get('egress-port')
             })
 
         flow_paths = []
