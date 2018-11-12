@@ -4,6 +4,7 @@ import falcon
 import logging
 
 from sfp.rib import Rib, RibItem
+from sfp.data import data
 
 logging.basicConfig(filename='sfp.log', level=logging.DEBUG)
 
@@ -54,8 +55,8 @@ class QueryEntry(object):
                     dst_port = obj.get("dst-port") or "*"
                     full_path = [Rib.DOMAIN_NAME] + ret_obj["path"]
                     Rib.rib.append(RibItem(src_ip=obj["src-ip"], dst_ip=obj["dst-ip"], src_port=src_port,
-                                            dst_port=dst_port, protocol=obj["protocol"], inner=False,
-                                            peer_speaker=peer, path=full_path))
+                                           dst_port=dst_port, protocol=obj["protocol"], inner=False,
+                                           peer_speaker=peer, path=full_path))
                     resp.status = falcon.HTTP_200
                     resp.body = json.dumps({"result": True, "path": full_path})
                     return
@@ -75,10 +76,76 @@ class PeerRegisterEntry(object):
     def on_post(self, req, resp):
         obj = json.loads(req.stream.read)
         addr = obj["address"]
-        Rib.peer_list.append(addr)
+        if addr not in Rib.peer_list:
+            Rib.peer_list.append(addr)
         resp.status = falcon.HTTP_200
         resp.body = json.dumps({"result": True})
 
 
 class PathQueryEntry():
-    pass
+    """
+    Input format:
+    {
+      "flows": [
+        {
+          "src": "10.0.1.100",
+          "dst": "10.0.2.100",
+          "ingress": "openflow2:1"
+        },
+        {
+          "src": "10.0.1.101",
+          "dst": "10.0.3.100",
+          "ingress": "openflow2:2"
+        }
+      ]
+    }
+
+    Output format:
+    {
+      "flow-paths": [
+        [0, 1],
+        [0, 2, 3]
+      ],
+      "path-property": [
+        {
+          "domain-id": "as1",
+          "ingress-port": null,
+          "egress-port": "openflow1:1"
+        },
+        {
+          "domain-id": "as2",
+          "ingress-port": "openflow2:1"
+        },
+        {
+          "domain-id": "as2",
+          "ingress-port": "openflow2:2"
+        },
+        {
+          "domain-id": "as3",
+          "ingress-port": "openflow3:1"
+        }
+      ]
+    }
+    """
+
+    def on_post(self, req, resp):
+        req_obj = json.loads(req.stream.read())
+        flow_paths_name = []
+        flows = req_obj.get("flows")
+        for flow in flows:
+            f = {"input": {"src-ip": flow["src"], "dst-ip": flow["dst"], "protocol": "tcp"}}
+            r = requests.post("http://127.0.0.1:8399/query", json=f)
+            flow_paths_name.append(json.load(r.text)["path"])
+
+        path_propety = []
+        all_names = list(set.union(*flow_paths_name))
+        for name in all_names:
+            path_propety.append({
+                "domain-id": name,
+                "ingress-port": data.domain_data.get('ingress-port'),
+                "egress-port": data.domain_data.get('egress-port')
+            })
+
+        flow_paths = [all_names.index(i) for i in flow_paths_name]
+        resp.status = falcon.HTTP_200
+        resp.body = json.dumps({ "flow-paths": flow_paths, "path-property": path_propety })
